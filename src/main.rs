@@ -1,6 +1,6 @@
 fn main() {
     use ed25519_axolotl::{
-        generate_key_pair, open_message, random_bytes, sign, sign_message, str_to_vec32, vec32_to_str, verify
+        open_message, random_bytes, sign, sign_message, str_to_vec32, vec32_to_str, verify, Keys,
     };
 
     // ------------------------------------------------------------
@@ -10,7 +10,7 @@ fn main() {
     println!("seed = {:?}", seed);
 
     // generate key pair
-    let keys = generate_key_pair(&seed);
+    let keys = Keys::generate_key_pair(&seed);
 
     println!("public_key = {:?}", keys.public_key);
     println!("private_key = {:?}", keys.private_key);

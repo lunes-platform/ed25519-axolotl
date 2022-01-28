@@ -9,28 +9,30 @@ pub struct Keys {
     pub private_key: Vec<u32>,
 }
 
-pub fn generate_key_pair(seed: &Vec<u32>) -> Keys {
-    let mut sk: Vec<u32> = vec![0; 32];
-    let mut pk: Vec<u32> = vec![0; 32];
+impl Keys {
+    pub fn generate_key_pair(seed: &Vec<u32>) -> Keys {
+        let mut sk: Vec<u32> = vec![0; 32];
+        let mut pk: Vec<u32> = vec![0; 32];
 
-    for i in 0..32 {
-        sk[i] = seed[i];
+        for i in 0..32 {
+            sk[i] = seed[i];
+        }
+
+        crypto_scalarmult_base(&mut pk, &sk);
+
+        // Turn secret key into the correct format.
+        sk[0] = sk[0] & 248;
+        sk[31] = sk[31] & 127;
+        sk[31] = sk[31] | 64;
+
+        // Remove sign bit from public key.
+        pk[31] = pk[31] & 127;
+
+        return Keys {
+            public_key: pk,
+            private_key: sk,
+        };
     }
-
-    crypto_scalarmult_base(&mut pk, &sk);
-
-    // Turn secret key into the correct format.
-    sk[0] = sk[0] & 248;
-    sk[31] = sk[31] & 127;
-    sk[31] = sk[31] | 64;
-
-    // Remove sign bit from public key.
-    pk[31] = pk[31] & 127;
-
-    return Keys {
-        public_key: pk,
-        private_key: sk,
-    };
 }
 
 pub fn sign_message(secret_key: &Vec<u32>, msg: &Vec<u32>, opt_random: &Vec<u32>) -> Vec<u32> {
@@ -126,7 +128,7 @@ mod test {
     #[test]
     fn test_keys() {
         let seed = vec![1; 32];
-        let keys = generate_key_pair(&seed);
+        let keys = Keys::generate_key_pair(&seed);
 
         assert_eq!(
             keys.public_key,
@@ -148,7 +150,7 @@ mod test {
     #[test]
     fn test_sign() {
         let seed = vec![1; 32];
-        let keys = generate_key_pair(&seed);
+        let keys = Keys::generate_key_pair(&seed);
 
         let rnd = random_bytes(64);
         let msg = str_to_vec32("hello e25519 axolotl".to_string());
@@ -164,7 +166,7 @@ mod test {
     #[test]
     fn test_msg() {
         let seed = vec![1; 32];
-        let keys = generate_key_pair(&seed);
+        let keys = Keys::generate_key_pair(&seed);
 
         let rnd = random_bytes(64);
         let msg = str_to_vec32("hello e25519 axolotl".to_string());
