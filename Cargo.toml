@@ -1,13 +1,13 @@
 [package]
 name = "ed25519-axolotl"
-version = "1.2.0"
+version = "1.2.1"
 edition = "2021"
 description = "Ed25519-like signatures with X25519 keys, Axolotl-style."
 repository = "https://github.com/lunes-platform/ed25519-axolotl.git"
 license = "MIT"
 keywords = ["ed25519", "axolotl", "lunes", "blockchain", "cryptography", "cryptocurrencies"]
-categories = ["algorithms", "no-std"]
-include = ["README.md"]
+categories = ["algorithms", "cryptography::cryptocurrencies", "cryptography", "wasm"]
+readme = "README.md"
 
 [dependencies]
 getrandom = { version = "0.2", features = ["js"] }
