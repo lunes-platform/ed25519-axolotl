@@ -1207,3 +1207,44 @@ fn vec32_to_str(vec: &Vec<u32>) -> String {
 	}
 	String::from_utf8(msg_8).expect("Found invalid UTF-8")
 }
+
+// fn main() {
+    
+// 	// random seed
+// 	let seed = randomBytes(32);
+	
+// 	println!("seed = {:?}", seed);
+	
+// 	// generate key pair
+// 	let keys = generateKeyPair(&seed); 
+	
+// 	println!("publicKey = {:?}", keys.publicKey);
+// 	println!("privateKey = {:?}", keys.privateKey);
+	
+// 	let rnd = randomBytes(64);
+	
+// 	println!("rnd = {:?}", rnd);
+	
+// 	let msg = str_to_vec32("¡lo esencial es invisible a los ojos!".to_string());
+	
+// 	println!("msg = {:?}", msg);
+	
+// 	let sig = sign(&keys.privateKey, &msg, &rnd);
+	
+// 	println!("sig = {:?}", sig);
+	
+// 	let res = verify(&keys.publicKey, &msg, &sig);
+// 	let res1 = verify(&keys.privateKey, &msg, &sig);
+
+// 	println!("res = {:?}", res);
+// 	println!("res1 = {:?}", res1);
+
+// 	let mut sigmsg = signMessage(&keys.privateKey, &msg, &rnd);
+// 	let msg2 = openMessage(&keys.publicKey, &mut sigmsg);
+	
+// 	println!("sigmsg = {:?}", sigmsg);
+// 	println!("msg2 = {:?}", msg2 );
+// 	println!("msg_8 = {:?}", vec32_to_str(&msg2));
+	
+// }
+
