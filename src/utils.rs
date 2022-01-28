@@ -76,11 +76,12 @@ fn vn(x: &Vec<u32>, xi: usize, y: &Vec<u32>, yi: usize, n: usize) -> isize {
     }
     let _d: i32 = d as i32 - 1;
     let _r = (1 & (_d as u32 >> 8)) as i32 - 1;
-    return _r as isize;
+
+    _r as isize
 }
 
 fn crypto_verify_32(x: &Vec<u32>, xi: usize, y: &Vec<u32>, yi: usize) -> isize {
-    return vn(x, xi, y, yi, 32);
+    vn(x, xi, y, yi, 32)
 }
 
 fn set25519(r: &mut Vec<i64>, a: &Vec<i64>) {
@@ -145,13 +146,15 @@ fn neq25519(a: &Vec<i64>, b: &Vec<i64>) -> isize {
     let mut d: Vec<u32> = vec![0; 32];
     pack25519(&mut c, a);
     pack25519(&mut d, b);
-    return crypto_verify_32(&c, 0, &d, 0);
+
+    crypto_verify_32(&c, 0, &d, 0)
 }
 
 fn par25519(a: &Vec<i64>) -> u32 {
     let mut d: Vec<u32> = vec![0; 32];
     pack25519(&mut d, a);
-    return d[0] & 1;
+
+    d[0] & 1
 }
 
 fn unpack25519(o: &mut Vec<i64>, n: &Vec<u32>) {
@@ -339,7 +342,7 @@ fn crypto_scalarmult(q: &mut Vec<u32>, n: &Vec<u32>, p: &Vec<u32>) -> usize {
 
     pack25519(q, &x16);
 
-    return 0;
+    0
 }
 
 // Constantes de cada ronda del SHA-512
@@ -640,7 +643,7 @@ fn crypto_hashblocks_hl(hh: &mut Vec<u32>, hl: &mut Vec<u32>, m: &Vec<u32>, _n: 
         n -= 128;
     }
 
-    return n;
+    n
 }
 
 fn crypto_hash(out: &mut Vec<u32>, m: &Vec<u32>, _n: usize) -> usize {
@@ -687,7 +690,7 @@ fn crypto_hash(out: &mut Vec<u32>, m: &Vec<u32>, _n: usize) -> usize {
         ts64(out, 8 * i, hh[i], hl[i]);
     }
 
-    return 0;
+    0
 }
 
 fn add(p: &mut Vec<Vec<i64>>, q: &mut Vec<Vec<i64>>) {
@@ -876,7 +879,7 @@ fn crypto_sign_direct(sm: &mut Vec<u32>, m: &Vec<u32>, n: usize, sk: &Vec<u32>) 
         sm[32 + i] = tmp[i];
     }
 
-    return n + 64;
+    n + 64
 }
 
 // Note: sm must be n+128.
@@ -950,7 +953,7 @@ fn crypto_sign_direct_rnd(
         sm[32 + i] = tmp[i];
     }
 
-    return n + 64;
+    n + 64
 }
 
 pub fn curve25519_sign(
@@ -996,7 +999,8 @@ pub fn curve25519_sign(
 
     // Copy sign bit from public key into signature.
     sm[63] = sm[63] | sign_bit;
-    return smlen;
+
+    smlen
 }
 
 fn unpackneg(r: &mut Vec<Vec<i64>>, p: &Vec<u32>) -> isize {
@@ -1061,7 +1065,7 @@ fn unpackneg(r: &mut Vec<Vec<i64>>, p: &Vec<u32>) -> isize {
     let _r1 = r[1].clone();
     M(&mut r[3], &_r0, &_r1);
 
-    return 0;
+    0
 }
 
 fn crypto_sign_open(m: &mut Vec<u32>, sm: &Vec<u32>, _n: usize, pk: &Vec<u32>) -> isize {
@@ -1102,6 +1106,7 @@ fn crypto_sign_open(m: &mut Vec<u32>, sm: &Vec<u32>, _n: usize, pk: &Vec<u32>) -
         for i in 0..n {
             m[i] = 0;
         }
+
         return -1;
     }
 
@@ -1110,7 +1115,8 @@ fn crypto_sign_open(m: &mut Vec<u32>, sm: &Vec<u32>, _n: usize, pk: &Vec<u32>) -
     }
 
     mlen = n as isize;
-    return mlen;
+
+    mlen
 }
 
 // Converts Curve25519 public key back to Ed25519 public key.
@@ -1131,7 +1137,8 @@ fn convert_public_key(pk: &Vec<u32>) -> Vec<u32> {
     M(&mut a, &_a, &b);
 
     pack25519(&mut z, &a);
-    return z;
+
+    z
 }
 
 pub fn curve25519_sign_open(m: &mut Vec<u32>, sm: &mut Vec<u32>, n: usize, pk: &Vec<u32>) -> isize {
@@ -1145,15 +1152,17 @@ pub fn curve25519_sign_open(m: &mut Vec<u32>, sm: &mut Vec<u32>, n: usize, pk: &
     sm[63] = sm[63] & 127;
 
     // Verify signed message.
-    return crypto_sign_open(m, &sm, n, &edpk);
+
+    crypto_sign_open(m, &sm, n, &edpk)
 }
 
 fn shared_key(secret_key: &Vec<u32>, public_key: &Vec<u32>) -> Vec<u32> {
     let mut shared_key: Vec<u32> = vec![0; 32];
     crypto_scalarmult(&mut shared_key, secret_key, public_key);
-    return shared_key;
+
+    shared_key
 }
 
 pub fn crypto_scalarmult_base(q: &mut Vec<u32>, n: &Vec<u32>) -> usize {
-    return crypto_scalarmult(q, n, &_9.to_vec());
+    crypto_scalarmult(q, n, &_9.to_vec())
 }
