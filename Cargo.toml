@@ -5,7 +5,7 @@ edition = "2021"
 description = "Ed25519-like signatures with X25519 keys, Axolotl-style."
 repository = "https://github.com/lunes-platform/ed25519-axolotl.git"
 license = "MIT"
-keywords = ["ed25519", "axolotl", "lunes", "blockchain", "cryptography", "cryptocurrencies"]
+keywords = ["ed25519", "axolotl", "lunes", "cryptography", "cryptocurrencies"]
 categories = ["algorithms", "cryptography::cryptocurrencies", "cryptography", "wasm"]
 readme = "README.md"
 
