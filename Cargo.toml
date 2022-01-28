@@ -2,8 +2,8 @@
 name = "ed25519-axolotl"
 version = "0.1.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+description = "Ed25519-like signatures with X25519 keys, Axolotl-style."
+license = "MIT"
 
 [dependencies]
 rand = "0.8.4"
