@@ -1,9 +1,10 @@
 [package]
 name = "ed25519-axolotl"
-version = "1.0.0"
+version = "1.0.1"
 edition = "2021"
 description = "Ed25519-like signatures with X25519 keys, Axolotl-style."
 license = "MIT"
 
 [dependencies]
+getrandom = { version = "0.2", features = ["js"] }
 rand = "0.8.4"
