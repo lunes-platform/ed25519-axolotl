@@ -32,31 +32,44 @@ impl KeyPair {
         // Remove sign bit from public key.
         pk[31] = pk[31] & 127;
 
-        KeyPair { prvk: sk, pubk: pk }
+        KeyPair {
+            prvk: sk.clone(),
+            pubk: pk.clone(),
+        }
     }
 }
 
 impl KeyPair {
-    pub fn sign_message(secret_key: &Vec<u32>, msg: &Vec<u32>, opt_random: &Vec<u32>) -> Vec<u32> {
+    pub fn sign_message(
+        secret_key: &Vec<u32>,
+        message: &Vec<u32>,
+        opt_random: &Vec<u32>,
+    ) -> Vec<u32> {
         if opt_random.len() > 0 {
-            let mut buf: Vec<u32> = vec![0; 128 + msg.len()];
-            curve25519_sign(&mut buf, &msg, msg.len(), secret_key, opt_random);
-            let tmp: Vec<u32> = (&buf[0..64 + msg.len()]).to_vec();
+            let mut buf: Vec<u32> = vec![0; 128 + message.len()];
+            curve25519_sign(&mut buf, &message, message.len(), secret_key, opt_random);
+            let tmp: Vec<u32> = (&buf[0..64 + message.len()]).to_vec();
             return tmp;
         } else {
-            let mut signed_msg: Vec<u32> = vec![0; 64 + msg.len()];
-            curve25519_sign(&mut signed_msg, &msg, msg.len(), secret_key, opt_random);
+            let mut signed_msg: Vec<u32> = vec![0; 64 + message.len()];
+            curve25519_sign(
+                &mut signed_msg,
+                &message,
+                message.len(),
+                secret_key,
+                opt_random,
+            );
             return signed_msg;
         }
     }
 
-    pub fn sign(secret_key: &Vec<u32>, msg: &Vec<u32>, opt_random: &Vec<u32>) -> Vec<u32> {
+    pub fn sign(secret_key: &Vec<u32>, message: &Vec<u32>, opt_random: &Vec<u32>) -> Vec<u32> {
         let mut len = 64;
         if opt_random.len() > 0 {
             len = 128;
         }
-        let mut buf: Vec<u32> = vec![0; len + msg.len()];
-        curve25519_sign(&mut buf, &msg, msg.len(), secret_key, opt_random);
+        let mut buf: Vec<u32> = vec![0; len + message.len()];
+        curve25519_sign(&mut buf, &message, message.len(), secret_key, opt_random);
 
         let mut signature: Vec<u32> = vec![0; 64];
         for i in 0..signature.len() {
@@ -75,23 +88,23 @@ impl KeyPair {
         return m;
     }
 
-    pub fn verify(public_key: &Vec<u32>, msg: &Vec<u32>, signature: &Vec<u32>) -> isize {
-        let mut sm: Vec<u32> = vec![0; 64 + msg.len()];
-        let mut m: Vec<u32> = vec![0; 64 + msg.len()];
+    pub fn verify(public_key: &Vec<u32>, message: &Vec<u32>, signature: &Vec<u32>) -> bool {
+        let mut sm: Vec<u32> = vec![0; 64 + message.len()];
+        let mut m: Vec<u32> = vec![0; 64 + message.len()];
 
         for i in 0..64 {
             sm[i] = signature[i];
         }
 
-        for i in 0..msg.len() {
-            sm[i + 64] = msg[i]
+        for i in 0..message.len() {
+            sm[i + 64] = message[i]
         }
 
         let sm_len = sm.len();
         if curve25519_sign_open(&mut m, &mut sm, sm_len, &public_key) >= 0 {
-            return 1;
+            return true;
         } else {
-            return 0;
+            return false;
         }
     }
 }
@@ -108,7 +121,7 @@ pub fn random_bytes(size: usize) -> Vec<u32> {
 }
 
 pub fn str_to_vec32(text: String) -> Vec<u32> {
-    let msg = (text.as_bytes()).to_vec();
+    let msg: Vec<u8> = text.as_bytes().to_vec();
     let mut msg_32: Vec<u32> = vec![0; msg.len()];
     for i in 0..msg.len() {
         msg_32[i] = msg[i] as u32;
@@ -140,7 +153,6 @@ mod test {
                 1, 1, 1, 65
             ]
         );
-        assert_eq!(keys.prvk.len(), 32);
         assert_eq!(
             keys.pubk,
             [
@@ -148,35 +160,33 @@ mod test {
                 217, 6, 180, 106, 182, 140, 157, 249, 220, 43, 68, 9, 248, 162, 9
             ]
         );
-        assert_eq!(keys.pubk.len(), 32);
     }
 
     #[test]
     fn test_sign() {
         let keys = KeyPair::new();
 
-        let rnd = random_bytes(64);
+        let random = random_bytes(64);
         let msg = str_to_vec32("hello e25519 axolotl".to_string());
-        let sig = KeyPair::sign(&keys.prvk, &msg, &rnd);
+        let sign = KeyPair::sign(&keys.prvk, &msg, &random);
 
-        let right = KeyPair::verify(&keys.pubk, &msg, &sig);
-        let wrong = KeyPair::verify(&keys.prvk, &msg, &sig);
+        let right = KeyPair::verify(&keys.pubk, &msg, &sign);
+        let wrong = KeyPair::verify(&keys.prvk, &msg, &sign);
 
-        assert_eq!(right, 1);
-        assert_eq!(wrong, 0);
+        assert_eq!(right, true);
+        assert_eq!(wrong, false);
     }
 
     #[test]
     fn test_msg() {
         let keys = KeyPair::new();
 
-        let rnd = random_bytes(64);
+        let random = random_bytes(64);
         let msg = str_to_vec32("hello e25519 axolotl".to_string());
-        let sig = KeyPair::sign(&keys.prvk, &msg, &rnd);
 
-        let mut sigmsg = KeyPair::sign_message(&keys.prvk, &msg, &rnd);
-        let msg2 = KeyPair::open_message(&keys.pubk, &mut sigmsg);
+        let mut sign_msg = KeyPair::sign_message(&keys.prvk, &msg, &random);
+        let msg = KeyPair::open_message(&keys.pubk, &mut sign_msg);
 
-        assert_eq!("hello e25519 axolotl", vec32_to_str(&msg2));
+        assert_eq!("hello e25519 axolotl", vec32_to_str(&msg));
     }
 }

@@ -1,47 +1,29 @@
 fn main() {
-    use ed25519_axolotl::{
-        open_message, random_bytes, sign, sign_message, str_to_vec32, vec32_to_str, verify, Keys,
-    };
+    use ed25519_axolotl::{random_bytes, str_to_vec32, vec32_to_str, KeyPair};
 
-    // ------------------------------------------------------------
-    // random seed
-    let seed = random_bytes(32);
+    // ------------------- Generate New Key Pair ------------------
+    let keys = KeyPair::new();
 
-    println!("seed = {:?}", seed);
+    println!("public key: {:?}", keys.prvk);
+    println!("private key: {:?}", keys.pubk);
+    // --------------------------- END ----------------------------
 
-    // generate key pair
-    let keys = Keys::generate_key_pair(&seed);
-
-    println!("public_key = {:?}", keys.public_key);
-    println!("private_key = {:?}", keys.private_key);
-    // ------------------------------------------------------------
-
-    // ------------------------------------------------------------
-    let rnd = random_bytes(64);
-
-    println!("rnd = {:?}", rnd);
-
+    // ---------------------- Sign Message ------------------------
+    let random = random_bytes(64);
     let msg = str_to_vec32("Hello Axolotl".to_string());
+    let sign = KeyPair::sign(&keys.prvk, &msg, &random);
 
-    println!("msg = {:?}", msg);
-
-    let sig = sign(&keys.private_key, &msg, &rnd);
-
-    println!("sig = {:?}", sig);
-
-    let res = verify(&keys.public_key, &msg, &sig);
-    let res1 = verify(&keys.private_key, &msg, &sig);
-    // ------------------------------------------------------------
+    let validate = KeyPair::verify(&keys.pubk, &msg, &sign);
+    println!("signature: {:?}", sign.len());
+    println!("validated? {:?}", validate);
+    // --------------------------- END ----------------------------
 
     // ------------------------------------------------------------
-    println!("res = {:?}", res);
-    println!("res1 = {:?}", res1);
+    let mut sign_msg = KeyPair::sign_message(&keys.prvk, &msg, &random);
+    let unpacked_msg = KeyPair::open_message(&keys.pubk, &mut sign_msg);
 
-    let mut sigmsg = sign_message(&keys.private_key, &msg, &rnd);
-    let msg2 = open_message(&keys.public_key, &mut sigmsg);
-
-    println!("sigmsg = {:?}", sigmsg);
-    println!("msg2 = {:?}", msg2);
-    println!("msg_8 = {:?}", vec32_to_str(&msg2));
+    println!("signature: {:?}", sign_msg.len());
+    println!("message vec: {:?}", unpacked_msg);
+    println!("message unpacked: {:?}", vec32_to_str(&unpacked_msg));
     // ------------------------------------------------------------
 }
