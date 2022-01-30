@@ -1,6 +1,6 @@
 [package]
 name = "ed25519-axolotl"
-version = "1.2.1"
+version = "1.3.0"
 edition = "2021"
 description = "Ed25519-like signatures with X25519 keys, Axolotl-style."
 repository = "https://github.com/lunes-platform/ed25519-axolotl.git"
@@ -9,18 +9,26 @@ keywords = ["ed25519", "axolotl", "lunes", "cryptography", "cryptocurrencies"]
 categories = ["algorithms", "cryptography::cryptocurrencies", "cryptography", "wasm"]
 readme = "README.md"
 
+[package.metadata.x]
+ci = """
+cargo build --release &&
+cargo test &&
+wasm-pack build --target nodejs &&
+wasm-pack test --node
+"""
+
 [dependencies]
 getrandom = { version = "0.2", features = ["js"] }
 rand = "0.8.4"
-# wasm-bindgen = "0.2.78"
-# wasm-bindgen-test = "0.3.29"
+wasm-bindgen = "0.2.78"
+wasm-bindgen-test = "0.3.29"
 
-# [package.metadata.wasm-pack.profile.release]
-# wasm-opt = false
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = false
 
-# [profile.release]
-# opt-level = "s"
-# lto = true
+[profile.release]
+opt-level = "s"
+lto = true
 
-# [lib]
-# crate-type = ["cdylib", "rlib"]
+[lib]
+crate-type = ["cdylib", "rlib"]
