@@ -3,23 +3,41 @@
 mod utils;
 use rand::Rng;
 use utils::*;
+use js_sys::Uint32Array;
+use wasm_bindgen::prelude::wasm_bindgen;
 
+
+
+#[wasm_bindgen]
 pub struct KeyPair {
-    pub prvk: Vec<u32>,
-    pub pubk: Vec<u32>,
+    prvk: Vec<u32>,
+    pubk: Vec<u32>,
 }
 
+
+#[wasm_bindgen]
 impl KeyPair {
-    pub fn new() -> KeyPair {
-        KeyPair::from_seed(&random_bytes(32))
+    #[wasm_bindgen(getter)]
+    pub fn prvk(&self) -> Uint32Array {
+        return Uint32Array::from(&self.prvk[..]);
     }
 
-    pub fn from_seed(seed: &Vec<u32>) -> KeyPair {
+    #[wasm_bindgen(getter)]
+    pub fn pubk(&self) -> Uint32Array {
+        return Uint32Array::from(&self.pubk[..]);
+    }
+
+    #[wasm_bindgen(constructor)]
+    pub fn new() -> KeyPair {
+        KeyPair::from_seed(Uint32Array::from(&random_bytes(32)[..]))
+    }
+
+    #[wasm_bindgen]
+    pub fn from_seed(seed: Uint32Array) -> KeyPair {
         let mut sk: Vec<u32> = vec![0; 32];
         let mut pk: Vec<u32> = vec![0; 32];
-
         for i in 0..32 {
-            sk[i] = seed[i];
+            sk[i] = seed.to_vec()[i];
         }
 
         crypto_scalarmult_base(&mut pk, &sk);
@@ -38,6 +56,8 @@ impl KeyPair {
         }
     }
 }
+
+
 
 impl KeyPair {
     pub fn sign_message(
