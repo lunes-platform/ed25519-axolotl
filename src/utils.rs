@@ -958,10 +958,9 @@ fn crypto_sign_direct_rnd(
 
 pub fn curve25519_sign(
     sm: &mut Vec<u32>,
-    m: &Vec<u32>,
-    n: usize,
-    sk: &Vec<u32>,
-    opt_rnd: &Vec<u32>,
+    m: Vec<u32>,
+    sk: Vec<u32>,
+    opt_rnd: Vec<u32>,
 ) -> usize {
     // If opt_rnd is provided, sm must have n + 128,
     // otherwise it must have n + 64 bytes.
@@ -992,9 +991,9 @@ pub fn curve25519_sign(
     let mut smlen: usize;
 
     if opt_rnd.len() > 0 {
-        smlen = crypto_sign_direct_rnd(sm, m, n, &edsk, opt_rnd);
+        smlen = crypto_sign_direct_rnd(sm, &m, m.len(), &edsk, &opt_rnd);
     } else {
-        smlen = crypto_sign_direct(sm, m, n, &edsk);
+        smlen = crypto_sign_direct(sm, &m, m.len(), &edsk);
     }
 
     // Copy sign bit from public key into signature.
@@ -1141,7 +1140,7 @@ fn convert_public_key(pk: &Vec<u32>) -> Vec<u32> {
     z
 }
 
-pub fn curve25519_sign_open(m: &mut Vec<u32>, sm: &mut Vec<u32>, n: usize, pk: &Vec<u32>) -> isize {
+pub fn curve25519_sign_open(m: &mut Vec<u32>, sm: &mut Vec<u32>, pk: Vec<u32>) -> isize {
     // Convert Curve25519 public key into Ed25519 public key.
     let mut edpk = convert_public_key(&pk);
 
@@ -1153,7 +1152,7 @@ pub fn curve25519_sign_open(m: &mut Vec<u32>, sm: &mut Vec<u32>, n: usize, pk: &
 
     // Verify signed message.
 
-    crypto_sign_open(m, &sm, n, &edpk)
+    crypto_sign_open(m, &sm, sm.len(), &edpk)
 }
 
 fn shared_key(secret_key: &Vec<u32>, public_key: &Vec<u32>) -> Vec<u32> {
