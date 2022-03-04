@@ -17,7 +17,8 @@
     "hdevalke.rust-test-lens",
     "serayuzgur.crates",
     "eamodio.gitlens",
-    "bungcip.better-toml"
+    "bungcip.better-toml",
+    "Tyriar.sort-lines"
   ],
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
   // "forwardPorts": [],
