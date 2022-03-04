@@ -14,29 +14,65 @@ use ed25519_axolotl::{
 
 ## Generate New Key Pair
 ```rs
-let keys = KeyPair::new();
+// seed: Vec<u32>
+// let keys = KeyPair::new(Some(seed));
+let keys = KeyPair::new(None);
 
-println!("private key: {:?}", keys.prvk);
-println!("public key: {:?}", keys.pubk);
+println!("{}", keys);
 ```
 
 
-## Sign Message
+## Fast Signature
+- 64 byte signature
+- quick to sign and verify
+- don't possible to decode signature back to message
 ```rs
-let random = random_bytes(64);
-let msg = str_to_vec32("Hello Axolotl".to_string());
-let sign = KeyPair::sign(&keys.prvk, &msg, &random);
+let keys = KeyPair::new(None);
 
-let validate = KeyPair::verify(&keys.pubk, &msg, &sign);
-println!("verify signature: {:?}", validate);
+let msg = str_to_vec32("hello e25519 axolotl".to_string());
+let signature = KeyPair::fast_signature(
+    keys.prvk,
+    msg.clone(),
+    Some(random_bytes(64))
+);
+
+assert_eq!(KeyPair::verify(keys.pubk, msg, signature), true);
+println!("ok");
 ```
 
-## Agreement Message
+## Full Signature
+- (64 + message length) byte signature
+- slow to sign and verify
+- it is possible to decode the signature back to the message
 ```rs
-let mut sign_msg = KeyPair::sign_message(&keys.prvk, &msg, &random);
-let unpacked_msg = KeyPair::open_message(&keys.pubk, &mut sign_msg);
+let keys = KeyPair::new(None);
 
-println!("message: {:?}", vec32_to_str(&unpacked_msg));
+let msg = str_to_vec32("hello e25519 axolotl".to_string());
+let signature = KeyPair::full_signature(
+    keys.prvk,
+    msg.clone(),
+    Some(random_bytes(64))
+);
+
+assert_eq!(KeyPair::verify(keys.pubk, msg, signature), true);
+println!("ok");
+```
+
+## Decode Message
+- possible only for full_signature function
+```rs
+let keys = KeyPair::new(None);
+
+let msg = str_to_vec32("hello e25519 axolotl".to_string());
+let mut sign_msg = KeyPair::full_signature(
+    keys.prvk,
+    msg.clone(),
+    Some(random_bytes(64))
+);
+let decoded_msg = KeyPair::decode_message(keys.pubk, &mut sign_msg);
+
+assert_eq!(msg, decoded_msg);
+println!("ok");
 ```
 
 
