@@ -147,10 +147,10 @@ const signature = wasm.fullSignature(k.privateKey, msg, wasm.randomBytes(64))
 const keys = new wasm.KeyPair()
 const msg = wasm.stringToUint32Array("hello lunes")
 
-const signatureFast = wasm.fastSignature(k.privateKey, msg, wasm.randomBytes(64))
+const signatureFast = wasm.fastSignature(keys.privateKey, msg, wasm.randomBytes(64))
 const validated = wasm.validateSignature(keys.publicKey, msg, signatureFast)
 
-const signatureFull = wasm.fullSignature(k.privateKey, msg, wasm.randomBytes(64))
+const signatureFull = wasm.fullSignature(keys.privateKey, msg, wasm.randomBytes(64))
 const validated = wasm.validateSignature(keys.publicKey, msg, signatureFull)
 ```
 
@@ -158,14 +158,11 @@ const validated = wasm.validateSignature(keys.publicKey, msg, signatureFull)
 - possible only for full_signature function
 ```js
 const keys = new wasm.KeyPair()
-
-
 const msg = wasm.stringToUint32Array("hello lunes")
-
-const signature = wasm.fullSignature(k.privateKey, msg, wasm.randomBytes(64))
+const signature = wasm.fullSignature(keys.privateKey, msg, wasm.randomBytes(64))
 
 const dmsg = wasm.uint32ArrayToString(
-    wasm.decode_message(k.publiKey, fl)
+    wasm.decode_message(keys.publiKey, signature)
 )
 ```
 
@@ -236,20 +233,15 @@ keys = KeyPair()
 message = b"hello lunes"
 signature_full = full_signature(keys.private_key, message, random_bytes(64))
 
-
 decode_msg = decode_message(keys.public_key, signature_full)
 like_string_msg   = ''.join(map(chr, decode_msg)))
 like_bytes_msg    = bytes(decode_msg)
 like_list_int_msg = decode_msg
-
 ```
 
 
 # Credits
 - Ported to Rust by Miguel Sandro Lucero, miguel.sandro@gmail.com, 2021.09.11, see [here](https://github.com/miguelsandro/curve25519-rust)
-
-- You can use it under MIT or CC0 license.
-
 - Curve25519 signatures idea and math by Trevor Perrin, see [here](https://moderncrypto.org/mail-archive/curves/2014/000205.html)
-
 - Derived from axlsign.js written by Dmitry Chestnykh, see [here](https://github.com/wavesplatform/curve25519-js)
+- You can use it under MIT.

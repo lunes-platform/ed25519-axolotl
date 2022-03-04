@@ -12,8 +12,9 @@ readme = "README.md"
 [package.metadata.x]
 ci = """
 cargo build --release &&
-cargo test &&
+maturin build --release &&
 wasm-pack build --target nodejs &&
+cargo test &&
 wasm-pack test --node
 """
 
