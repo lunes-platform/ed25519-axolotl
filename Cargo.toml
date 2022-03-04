@@ -11,15 +11,15 @@ readme = "README.md"
 
 [package.metadata.x]
 ci = """
-cargo build --release &&
-cargo test &&
-wasm-pack build --target nodejs &&
-wasm-pack test --node
+cargo build --release
+&& maturin build --release
+&& wasm-pack build --target nodejs
+&& cargo test
+&& wasm-pack test --node
 """
 
 [dependencies]
 pyo3 = { version = "0.16.0", features = ["extension-module"] }
-getrandom = { version = "0.2", features = ["js"] }
 wasm-bindgen-test = "0.3.29"
 wasm-bindgen = "0.2.78"
 rand = "0.8.4"
