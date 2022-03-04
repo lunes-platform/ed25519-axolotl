@@ -18,9 +18,12 @@ use ed25519_axolotl::{
 
 
 ## Generate New `KeyPair`
+- the seed needs 32 bytes length or more
+- if none, generate random keys
 ```rs
 // seed: Vec<u32>
 // let keys = KeyPair::new(Some(seed));
+
 let keys = KeyPair::new(None);
 
 println!("{}", keys);
@@ -40,9 +43,6 @@ let signature = fast_signature(
     msg.clone(),
     Some(random_bytes(64))
 );
-
-assert_eq!(verify(keys.pubk, msg, signature), true);
-println!("ok");
 ```
 
 ## Full Signature
@@ -58,9 +58,28 @@ let signature = full_signature(
     msg.clone(),
     Some(random_bytes(64))
 );
+```
 
-assert_eq!(verify(keys.pubk, msg, signature), true);
-println!("ok");
+## Validate Signatures
+- works with both fast and full signatures
+```rs
+let keys = KeyPair::new(None);
+
+
+let msg = str_to_vec32("hello e25519 axolotl".to_string());
+let signature_full = full_signature(
+    keys.prvk,
+    msg.clone(),
+    Some(random_bytes(64))
+);
+assert_eq!(true, validate_signature(keys.pubk, msg, signature_full));
+
+let signature_fast = fast_signature(
+    keys.prvk,
+    msg.clone(),
+    Some(random_bytes(64))
+);
+assert_eq!(true, validate_signature(keys.pubk, msg, signature_fast));
 ```
 
 ## Decode Message
@@ -75,9 +94,6 @@ let mut sign_msg = full_signature(
     Some(random_bytes(64))
 );
 let decoded_msg = decode_message(keys.pubk, &mut sign_msg);
-
-assert_eq!(msg, decoded_msg);
-println!("ok");
 ```
 
 # NodeJs (WebAssembly)
@@ -92,11 +108,13 @@ const wasm = require("ed25519_axolotl")
 
 
 ## Generate New `KeyPair`
+- the seed needs 32 bytes length or more
+- if none, generate random keys
 ```js
+// const seed =  wasm.stringToUint32Array("your seed with 32 bytes of length or more")
+// const keys = new wasm.KeyPair(seed)
 const keys = new wasm.KeyPair()
 
-console.log(keys.privateKey) // Uint32Array
-console.log(keys.publiKey) // Uint32Array
 ```
 
 
@@ -107,14 +125,8 @@ console.log(keys.publiKey) // Uint32Array
 ```js
 const keys = new wasm.KeyPair()
 
-console.log(keys.privateKey) // Uint32Array
-console.log(keys.publiKey) // Uint32Array
-
 const msg = wasm.stringToUint32Array("hello lunes")
-console.log(msg) // Uint32Array
-
 const signature = wasm.fastSignature(k.privateKey, msg, wasm.randomBytes(64))
-console.log(signature) // Uint32Array
 ```
 
 ## Full Signature
@@ -124,14 +136,22 @@ console.log(signature) // Uint32Array
 ```js
 const keys = new wasm.KeyPair()
 
-console.log(keys.privateKey) // Uint32Array
-console.log(keys.publiKey) // Uint32Array
-
 const msg = wasm.stringToUint32Array("hello lunes")
-console.log(msg) // Uint32Array
-
 const signature = wasm.fullSignature(k.privateKey, msg, wasm.randomBytes(64))
-console.log(signature) // Uint32Array
+```
+
+
+## Validate Signatures
+- works with both fast and full signatures
+```js
+const keys = new wasm.KeyPair()
+const msg = wasm.stringToUint32Array("hello lunes")
+
+const signatureFast = wasm.fastSignature(k.privateKey, msg, wasm.randomBytes(64))
+const validated = wasm.validateSignature(keys.publicKey, msg, signatureFast)
+
+const signatureFull = wasm.fullSignature(k.privateKey, msg, wasm.randomBytes(64))
+const validated = wasm.validateSignature(keys.publicKey, msg, signatureFull)
 ```
 
 ## Decode Message
@@ -139,29 +159,39 @@ console.log(signature) // Uint32Array
 ```js
 const keys = new wasm.KeyPair()
 
-console.log(keys.privateKey) // Uint32Array
-console.log(keys.publiKey) // Uint32Array
 
 const msg = wasm.stringToUint32Array("hello lunes")
-console.log(msg) // Uint32Array
 
 const signature = wasm.fullSignature(k.privateKey, msg, wasm.randomBytes(64))
-console.log(signature) // Uint32Array
 
 const dmsg = wasm.uint32ArrayToString(
     wasm.decode_message(k.publiKey, fl)
 )
-console.log(dmsg) // String
 ```
 
-# Python (C/C++)
+# Python (Cython)
 ## Import
-```js
+```py
+from ed25519_axolotl import KeyPair
+from ed25519_axolotl import (
+    validate_signature,
+    fast_signature,
+    full_signature,
+    decode_message
+)
 ```
 
 
 ## Generate New `KeyPair`
-```js
+- the seed needs 32 bytes length or more
+- if none, generate random keys
+```py
+# seed: bytes = [i for i in range(32)]
+# keys = KeyPair( seed )
+keys = KeyPair()
+
+keys.private_key
+keys.public_key
 ```
 
 
@@ -169,24 +199,54 @@ console.log(dmsg) // String
 - 64 byte signature
 - quick to sign and verify
 - don't possible to decode signature back to message
-```js
+```py
+keys = KeyPair()
+message = b"hello lunes"
+
+signature = fast_signature(keys.private_key, message, random_bytes(64))
 ```
 
 ## Full Signature
 - (64 + message length) byte signature
 - slow to sign and verify
 - it is possible to decode the signature back to the message
-```js
+```py
+keys = KeyPair()
+message = b"hello lunes"
+
+signature_full = full_signature(keys.private_key, message, random_bytes(64))
 ```
 
+## Validate Signatures
+- works with both fast and full signatures
+```py
+keys = KeyPair()
+msg = b"hello lunes"
+
+signatureFast = fast_signature(k.private_key, msg, random_bytes(64))
+validated = validate_signature(keys.public_key, msg, signature_fast)
+
+signatureFull = fullSignature(k.private_key, msg, random_bytes(64))
+validated = validate_signature(keys.public_key, msg, signature_full)
+```
 ## Decode Message
 - possible only for full_signature function
-```js
+```py
+keys = KeyPair()
+message = b"hello lunes"
+signature_full = full_signature(keys.private_key, message, random_bytes(64))
+
+
+decode_msg = decode_message(keys.public_key, signature_full)
+like_string_msg   = ''.join(map(chr, decode_msg)))
+like_bytes_msg    = bytes(decode_msg)
+like_list_int_msg = decode_msg
+
 ```
 
 
 # Credits
-- Ported to Rust by Miguel Sandro Lucero, miguel.sandro@gmail.com, 2021.09.11.
+- Ported to Rust by Miguel Sandro Lucero, miguel.sandro@gmail.com, 2021.09.11, see [here](https://github.com/miguelsandro/curve25519-rust)
 
 - You can use it under MIT or CC0 license.
 
