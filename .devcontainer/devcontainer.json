@@ -14,7 +14,10 @@
     "swellaby.vscode-rust-test-adapter",
     "matklad.rust-analyzer",
     "rust-lang.rust",
-    "hdevalke.rust-test-lens"
+    "hdevalke.rust-test-lens",
+    "serayuzgur.crates",
+    "eamodio.gitlens",
+    "bungcip.better-toml"
   ],
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
   // "forwardPorts": [],
