@@ -319,7 +319,7 @@ mod test {
     }
 
     mod signature_functions {
-        use super::{fast_signature, full_signature, random_bytes, str_to_vec32, verify, KeyPair};
+        use super::{fast_signature, full_signature, random_bytes, str_to_vec32, validate_signature, KeyPair};
 
         fn main_keys() -> KeyPair {
             KeyPair::new(Some(vec![1; 32]))
@@ -333,7 +333,7 @@ mod test {
                 let signature =
                     fast_signature(main_keys().prvk, msg.clone(), Some(random_bytes(64)));
 
-                assert_eq!(verify(main_keys().pubk, msg, signature), true)
+                assert_eq!(validate_signature(main_keys().pubk, msg, signature), true)
             }
 
             #[test]
@@ -342,7 +342,7 @@ mod test {
                 let signature =
                     fast_signature(main_keys().prvk, msg.clone(), Some(random_bytes(64)));
 
-                assert_eq!(verify(main_keys().pubk, msg, signature), true)
+                assert_eq!(validate_signature(main_keys().pubk, msg, signature), true)
             }
 
             #[test]
@@ -351,7 +351,7 @@ mod test {
                 let signature =
                     fast_signature(main_keys().prvk, msg.clone(), Some(random_bytes(64)));
 
-                assert_eq!(verify(main_keys().pubk, msg, signature), true)
+                assert_eq!(validate_signature(main_keys().pubk, msg, signature), true)
             }
 
             #[test]
@@ -360,7 +360,7 @@ mod test {
                 let signature =
                     fast_signature(main_keys().prvk, msg.clone(), Some(random_bytes(64)));
 
-                assert_eq!(verify(main_keys().pubk, msg, signature), true)
+                assert_eq!(validate_signature(main_keys().pubk, msg, signature), true)
             }
 
             #[test]
@@ -369,7 +369,7 @@ mod test {
                 let signature =
                     fast_signature(main_keys().prvk, msg.clone(), Some(random_bytes(64)));
 
-                assert_eq!(verify(main_keys().pubk, msg, signature), true)
+                assert_eq!(validate_signature(main_keys().pubk, msg, signature), true)
             }
 
             #[test]
@@ -378,7 +378,7 @@ mod test {
                 let signature =
                     fast_signature(main_keys().prvk, msg.clone(), Some(random_bytes(64)));
 
-                assert_eq!(verify(main_keys().pubk, msg, signature), true)
+                assert_eq!(validate_signature(main_keys().pubk, msg, signature), true)
             }
         }
 
@@ -391,7 +391,7 @@ mod test {
                 let signature =
                     full_signature(main_keys().prvk, msg.clone(), Some(random_bytes(64)));
 
-                assert_eq!(verify(main_keys().pubk, msg, signature), true)
+                assert_eq!(validate_signature(main_keys().pubk, msg, signature), true)
             }
 
             #[test]
@@ -400,7 +400,7 @@ mod test {
                 let signature =
                     full_signature(main_keys().prvk, msg.clone(), Some(random_bytes(64)));
 
-                assert_eq!(verify(main_keys().pubk, msg, signature), true)
+                assert_eq!(validate_signature(main_keys().pubk, msg, signature), true)
             }
 
             #[test]
@@ -409,7 +409,7 @@ mod test {
                 let signature =
                     full_signature(main_keys().prvk, msg.clone(), Some(random_bytes(64)));
 
-                assert_eq!(verify(main_keys().pubk, msg, signature), true)
+                assert_eq!(validate_signature(main_keys().pubk, msg, signature), true)
             }
 
             #[test]
@@ -418,7 +418,7 @@ mod test {
                 let signature =
                     full_signature(main_keys().prvk, msg.clone(), Some(random_bytes(64)));
 
-                assert_eq!(verify(main_keys().pubk, msg, signature), true)
+                assert_eq!(validate_signature(main_keys().pubk, msg, signature), true)
             }
 
             #[test]
@@ -427,7 +427,7 @@ mod test {
                 let signature =
                     full_signature(main_keys().prvk, msg.clone(), Some(random_bytes(64)));
 
-                assert_eq!(verify(main_keys().pubk, msg, signature), true)
+                assert_eq!(validate_signature(main_keys().pubk, msg, signature), true)
             }
 
             #[test]
@@ -436,7 +436,7 @@ mod test {
                 let signature =
                     full_signature(main_keys().prvk, msg.clone(), Some(random_bytes(64)));
 
-                assert_eq!(verify(main_keys().pubk, msg, signature), true)
+                assert_eq!(validate_signature(main_keys().pubk, msg, signature), true)
             }
         }
     }
