@@ -3,17 +3,13 @@
 mod utils;
 use rand::Rng;
 use utils::*;
-use js_sys::Uint32Array;
 use wasm_bindgen::prelude::wasm_bindgen;
-
-
 
 #[wasm_bindgen]
 pub struct KeyPair {
     prvk: Vec<u32>,
     pubk: Vec<u32>,
 }
-
 
 impl std::fmt::Display for KeyPair {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
@@ -26,7 +22,6 @@ impl std::fmt::Display for KeyPair {
         )
     }
 }
-
 
 #[wasm_bindgen]
 impl KeyPair {
@@ -58,95 +53,102 @@ impl KeyPair {
         }
     }
 
-    #[wasm_bindgen(getter)]
-    pub fn prvk(&self) -> Uint32Array {
-        return Uint32Array::from(&self.prvk[..]);
+    #[wasm_bindgen(getter, js_name = "privateKey")]
+    pub fn prvk(&self) -> Vec<u32> {
+        return self.prvk.clone();
     }
 
-    #[wasm_bindgen(getter)]
-    pub fn pubk(&self) -> Uint32Array {
-        return Uint32Array::from(&self.pubk[..]);
+    #[wasm_bindgen(getter, js_name = "publiKey")]
+    pub fn pubk(&self) -> Vec<u32> {
+        return self.pubk.clone();
     }
 }
 
-
-
-impl KeyPair {
-    pub fn full_signature(secret_key: Vec<u32>, message: Vec<u32>, opt_random: Option<Vec<u32>>) -> Vec<u32> {
-        match opt_random {
-            Some(random) => {
-                let mut buf: Vec<u32> = vec![0; 128 + message.len()];
-                curve25519_sign(&mut buf, message.clone(), secret_key, random);
-                (buf[0..64 + message.len()]).to_vec()
-            },
-            None => {
-                let mut signed_msg: Vec<u32> = vec![0; 64 + message.len()];
-                curve25519_sign(
-                    &mut signed_msg,
-                    message,
-                    secret_key,
-                    random_bytes(64)
-                );
-                signed_msg
-            }
+#[wasm_bindgen(js_name = "fullSignature")]
+pub fn full_signature(
+    secret_key: Vec<u32>,
+    message: Vec<u32>,
+    opt_random: Option<Vec<u32>>,
+) -> Vec<u32> {
+    match opt_random {
+        Some(random) => {
+            let mut buf: Vec<u32> = vec![0; 128 + message.len()];
+            curve25519_sign(&mut buf, message.clone(), secret_key, random);
+            (buf[0..64 + message.len()]).to_vec()
         }
-    }
-
-    pub fn fast_signature(secret_key: Vec<u32>, message: Vec<u32>, opt_random: Option<Vec<u32>>) -> Vec<u32> {
-        match opt_random {
-            Some(random) => {
-                let mut buf: Vec<u32> = vec![0; 128 + message.len()];
-                curve25519_sign(&mut buf, message, secret_key, random);
-
-                let mut signature: Vec<u32> = vec![0; 64];
-                for i in 0..signature.len() {
-                    signature[i] = buf[i];
-                }
-                signature
-            },
-            None => {
-                let mut buf: Vec<u32> = vec![0; 64 + message.len()];
-                curve25519_sign(&mut buf, message, secret_key, random_bytes(64));
-
-                let mut signature: Vec<u32> = vec![0; 64];
-                for i in 0..signature.len() {
-                    signature[i] = buf[i];
-                }
-                signature
-            }
-        }
-    }
-
-    pub fn decode_message(public_key: Vec<u32>, signed_msg: &mut Vec<u32>) -> Vec<u32> {
-        let mut tmp: Vec<u32> = vec![0; signed_msg.len()];
-        let message_len = curve25519_sign_open(&mut tmp, signed_msg, public_key) as usize;
-        let mut message: Vec<u32> = vec![0; message_len as usize];
-        for i in 0..message_len {
-            message[i] = tmp[i]
-        };
-        message
-    }
-
-    pub fn verify(public_key: Vec<u32>, message: Vec<u32>, signature: Vec<u32>) -> bool {
-        let mut sm: Vec<u32> = vec![0; 64 + message.len()];
-        let mut m: Vec<u32> = vec![0; 64 + message.len()];
-
-        for i in 0..64 {
-            sm[i] = signature[i];
-        }
-
-        for i in 0..message.len() {
-            sm[i + 64] = message[i]
-        }
-
-        if curve25519_sign_open(&mut m, &mut sm, public_key) < 0 {
-            false
-        } else {
-            true
+        None => {
+            let mut signed_msg: Vec<u32> = vec![0; 64 + message.len()];
+            curve25519_sign(&mut signed_msg, message, secret_key, random_bytes(64));
+            signed_msg
         }
     }
 }
 
+#[wasm_bindgen(js_name = "fastSignature")]
+pub fn fast_signature(
+    secret_key: Vec<u32>,
+    message: Vec<u32>,
+    opt_random: Option<Vec<u32>>,
+) -> Vec<u32> {
+    match opt_random {
+        Some(random) => {
+            let mut buf: Vec<u32> = vec![0; 128 + message.len()];
+            curve25519_sign(&mut buf, message, secret_key, random);
+
+            let mut signature: Vec<u32> = vec![0; 64];
+            for i in 0..signature.len() {
+                signature[i] = buf[i];
+            }
+            signature
+        }
+        None => {
+            let mut buf: Vec<u32> = vec![0; 64 + message.len()];
+            curve25519_sign(&mut buf, message, secret_key, random_bytes(64));
+
+            let mut signature: Vec<u32> = vec![0; 64];
+            for i in 0..signature.len() {
+                signature[i] = buf[i];
+            }
+            signature
+        }
+    }
+}
+
+#[wasm_bindgen(js_name = "validateSinature")]
+pub fn verify(public_key: Vec<u32>, message: Vec<u32>, signature: Vec<u32>) -> bool {
+    let mut sm: Vec<u32> = vec![0; 64 + message.len()];
+    let mut m: Vec<u32> = vec![0; 64 + message.len()];
+
+    for i in 0..64 {
+        sm[i] = signature[i];
+    }
+
+    for i in 0..message.len() {
+        sm[i + 64] = message[i]
+    }
+
+    if curve25519_sign_open(&mut m, &mut sm, public_key) < 0 {
+        false
+    } else {
+        true
+    }
+}
+
+#[wasm_bindgen]
+pub fn decode_message(public_key: Vec<u32>, signed_msg: Vec<u32>) -> Vec<u32> {
+    let mut tmp: Vec<u32> = vec![0; signed_msg.len()];
+    let mut ref_signed_msg = signed_msg.clone();
+
+    let message_len = curve25519_sign_open(&mut tmp, &mut ref_signed_msg, public_key) as usize;
+    let mut message: Vec<u32> = vec![0; message_len as usize];
+    for i in 0..message_len {
+        message[i] = tmp[i]
+    }
+
+    message
+}
+
+#[wasm_bindgen(js_name = "randomBytes")]
 pub fn random_bytes(size: usize) -> Vec<u32> {
     let High: u32 = 255;
     let Low: u32 = 0;
@@ -158,6 +160,7 @@ pub fn random_bytes(size: usize) -> Vec<u32> {
     return seed;
 }
 
+#[wasm_bindgen(js_name = "stringToUint32Array")]
 pub fn str_to_vec32(text: String) -> Vec<u32> {
     let msg: Vec<u8> = text.as_bytes().to_vec();
     let mut msg_32: Vec<u32> = vec![0; msg.len()];
@@ -167,7 +170,8 @@ pub fn str_to_vec32(text: String) -> Vec<u32> {
     msg_32
 }
 
-pub fn vec32_to_str(vec: &Vec<u32>) -> String {
+#[wasm_bindgen(js_name = "uint32ArrayToString")]
+pub fn vec32_to_str(vec: Vec<u32>) -> String {
     let mut msg_8: Vec<u8> = vec![0; vec.len()];
     for i in 0..vec.len() {
         msg_8[i] = vec[i] as u8;
@@ -289,7 +293,7 @@ mod test {
     }
 
     mod signature_functions {
-        use super::{random_bytes, str_to_vec32, KeyPair};
+        use super::{fast_signature, full_signature, random_bytes, str_to_vec32, verify, KeyPair};
 
         fn main_keys() -> KeyPair {
             KeyPair::new(Some(vec![1; 32]))
@@ -300,49 +304,55 @@ mod test {
             #[test]
             fn test_0() {
                 let msg = str_to_vec32("hello e25519 axolotl".to_string());
-                let signature = KeyPair::fast_signature(main_keys().prvk, msg.clone(), Some(random_bytes(64)));
+                let signature =
+                    fast_signature(main_keys().prvk, msg.clone(), Some(random_bytes(64)));
 
-                assert_eq!(KeyPair::verify(main_keys().pubk, msg, signature), true)
+                assert_eq!(verify(main_keys().pubk, msg, signature), true)
             }
 
             #[test]
             fn test_1() {
                 let msg = str_to_vec32("testing other message in signature".to_string());
-                let signature = KeyPair::fast_signature(main_keys().prvk, msg.clone(), Some(random_bytes(64)));
+                let signature =
+                    fast_signature(main_keys().prvk, msg.clone(), Some(random_bytes(64)));
 
-                assert_eq!(KeyPair::verify(main_keys().pubk, msg, signature), true)
+                assert_eq!(verify(main_keys().pubk, msg, signature), true)
             }
 
             #[test]
             fn test_2() {
                 let msg = str_to_vec32("1234567890".to_string());
-                let signature = KeyPair::fast_signature(main_keys().prvk, msg.clone(), Some(random_bytes(64)));
+                let signature =
+                    fast_signature(main_keys().prvk, msg.clone(), Some(random_bytes(64)));
 
-                assert_eq!(KeyPair::verify(main_keys().pubk, msg, signature), true)
+                assert_eq!(verify(main_keys().pubk, msg, signature), true)
             }
 
             #[test]
             fn test_3() {
                 let msg = str_to_vec32("acacacacacaca".to_string());
-                let signature = KeyPair::fast_signature(main_keys().prvk, msg.clone(), Some(random_bytes(64)));
+                let signature =
+                    fast_signature(main_keys().prvk, msg.clone(), Some(random_bytes(64)));
 
-                assert_eq!(KeyPair::verify(main_keys().pubk, msg, signature), true)
+                assert_eq!(verify(main_keys().pubk, msg, signature), true)
             }
 
             #[test]
             fn test_4() {
                 let msg = str_to_vec32("new test".to_string());
-                let signature = KeyPair::fast_signature(main_keys().prvk, msg.clone(), Some(random_bytes(64)));
+                let signature =
+                    fast_signature(main_keys().prvk, msg.clone(), Some(random_bytes(64)));
 
-                assert_eq!(KeyPair::verify(main_keys().pubk, msg, signature), true)
+                assert_eq!(verify(main_keys().pubk, msg, signature), true)
             }
 
             #[test]
             fn test_5() {
                 let msg = str_to_vec32("five test with sign function".to_string());
-                let signature = KeyPair::fast_signature(main_keys().prvk, msg.clone(), Some(random_bytes(64)));
+                let signature =
+                    fast_signature(main_keys().prvk, msg.clone(), Some(random_bytes(64)));
 
-                assert_eq!(KeyPair::verify(main_keys().pubk, msg, signature), true)
+                assert_eq!(verify(main_keys().pubk, msg, signature), true)
             }
         }
 
@@ -352,49 +362,55 @@ mod test {
             #[test]
             fn test_0() {
                 let msg = str_to_vec32("hello e25519 axolotl".to_string());
-                let signature = KeyPair::full_signature(main_keys().prvk, msg.clone(), Some(random_bytes(64)));
+                let signature =
+                    full_signature(main_keys().prvk, msg.clone(), Some(random_bytes(64)));
 
-                assert_eq!(KeyPair::verify(main_keys().pubk, msg, signature), true)
+                assert_eq!(verify(main_keys().pubk, msg, signature), true)
             }
 
             #[test]
             fn test_1() {
                 let msg = str_to_vec32("testing other message in signature".to_string());
-                let signature = KeyPair::full_signature(main_keys().prvk, msg.clone(), Some(random_bytes(64)));
+                let signature =
+                    full_signature(main_keys().prvk, msg.clone(), Some(random_bytes(64)));
 
-                assert_eq!(KeyPair::verify(main_keys().pubk, msg, signature), true)
+                assert_eq!(verify(main_keys().pubk, msg, signature), true)
             }
 
             #[test]
             fn test_2() {
                 let msg = str_to_vec32("1234567890".to_string());
-                let signature = KeyPair::full_signature(main_keys().prvk, msg.clone(), Some(random_bytes(64)));
+                let signature =
+                    full_signature(main_keys().prvk, msg.clone(), Some(random_bytes(64)));
 
-                assert_eq!(KeyPair::verify(main_keys().pubk, msg, signature), true)
+                assert_eq!(verify(main_keys().pubk, msg, signature), true)
             }
 
             #[test]
             fn test_3() {
                 let msg = str_to_vec32("acacacacacaca".to_string());
-                let signature = KeyPair::full_signature(main_keys().prvk, msg.clone(), Some(random_bytes(64)));
+                let signature =
+                    full_signature(main_keys().prvk, msg.clone(), Some(random_bytes(64)));
 
-                assert_eq!(KeyPair::verify(main_keys().pubk, msg, signature), true)
+                assert_eq!(verify(main_keys().pubk, msg, signature), true)
             }
 
             #[test]
             fn test_4() {
                 let msg = str_to_vec32("new test".to_string());
-                let signature = KeyPair::full_signature(main_keys().prvk, msg.clone(), Some(random_bytes(64)));
+                let signature =
+                    full_signature(main_keys().prvk, msg.clone(), Some(random_bytes(64)));
 
-                assert_eq!(KeyPair::verify(main_keys().pubk, msg, signature), true)
+                assert_eq!(verify(main_keys().pubk, msg, signature), true)
             }
 
             #[test]
             fn test_5() {
                 let msg = str_to_vec32("five test with sign function".to_string());
-                let signature = KeyPair::full_signature(main_keys().prvk, msg.clone(), Some(random_bytes(64)));
+                let signature =
+                    full_signature(main_keys().prvk, msg.clone(), Some(random_bytes(64)));
 
-                assert_eq!(KeyPair::verify(main_keys().pubk, msg, signature), true)
+                assert_eq!(verify(main_keys().pubk, msg, signature), true)
             }
         }
     }
@@ -407,10 +423,10 @@ mod test {
             let keys = KeyPair::new(None);
             let msg = str_to_vec32("hello e25519 axolotl".to_string());
 
-            let mut sign_msg = KeyPair::full_signature(keys.prvk, msg, Some(random_bytes(64)));
-            let msg = KeyPair::decode_message(keys.pubk, &mut sign_msg);
+            let mut sign_msg = full_signature(keys.prvk, msg, Some(random_bytes(64)));
+            let msg = decode_message(keys.pubk, sign_msg);
 
-            assert_eq!("hello e25519 axolotl", vec32_to_str(&msg));
+            assert_eq!("hello e25519 axolotl", vec32_to_str(msg));
         }
 
         #[test]
@@ -418,10 +434,10 @@ mod test {
             let keys = KeyPair::new(None);
             let msg = str_to_vec32("testing other message in signature".to_string());
 
-            let mut sign_msg = KeyPair::full_signature(keys.prvk, msg, Some(random_bytes(64)));
-            let msg = KeyPair::decode_message(keys.pubk, &mut sign_msg);
+            let mut sign_msg = full_signature(keys.prvk, msg, Some(random_bytes(64)));
+            let msg = decode_message(keys.pubk, sign_msg);
 
-            assert_eq!("testing other message in signature", vec32_to_str(&msg));
+            assert_eq!("testing other message in signature", vec32_to_str(msg));
         }
 
         #[test]
@@ -429,10 +445,10 @@ mod test {
             let keys = KeyPair::new(None);
             let msg = str_to_vec32("1234567890".to_string());
 
-            let mut sign_msg = KeyPair::full_signature(keys.prvk, msg, Some(random_bytes(64)));
-            let msg = KeyPair::decode_message(keys.pubk, &mut sign_msg);
+            let mut sign_msg = full_signature(keys.prvk, msg, Some(random_bytes(64)));
+            let msg = decode_message(keys.pubk, sign_msg);
 
-            assert_eq!("1234567890", vec32_to_str(&msg));
+            assert_eq!("1234567890", vec32_to_str(msg));
         }
 
         #[test]
@@ -440,10 +456,10 @@ mod test {
             let keys = KeyPair::new(None);
             let msg = str_to_vec32("acacacacacaca".to_string());
 
-            let mut sign_msg = KeyPair::full_signature(keys.prvk, msg, Some(random_bytes(64)));
-            let msg = KeyPair::decode_message(keys.pubk, &mut sign_msg);
+            let mut sign_msg = full_signature(keys.prvk, msg, Some(random_bytes(64)));
+            let msg = decode_message(keys.pubk, sign_msg);
 
-            assert_eq!("acacacacacaca", vec32_to_str(&msg));
+            assert_eq!("acacacacacaca", vec32_to_str(msg));
         }
 
         #[test]
@@ -451,10 +467,10 @@ mod test {
             let keys = KeyPair::new(None);
             let msg = str_to_vec32("new test".to_string());
 
-            let mut sign_msg = KeyPair::full_signature(keys.prvk, msg, Some(random_bytes(64)));
-            let msg = KeyPair::decode_message(keys.pubk, &mut sign_msg);
+            let mut sign_msg = full_signature(keys.prvk, msg, Some(random_bytes(64)));
+            let msg = decode_message(keys.pubk, sign_msg);
 
-            assert_eq!("new test", vec32_to_str(&msg));
+            assert_eq!("new test", vec32_to_str(msg));
         }
 
         #[test]
@@ -462,10 +478,10 @@ mod test {
             let keys = KeyPair::new(None);
             let msg = str_to_vec32("five test with sign function".to_string());
 
-            let mut sign_msg = KeyPair::full_signature(keys.prvk, msg, Some(random_bytes(64)));
-            let msg = KeyPair::decode_message(keys.pubk, &mut sign_msg);
+            let mut sign_msg = full_signature(keys.prvk, msg, Some(random_bytes(64)));
+            let msg = decode_message(keys.pubk, sign_msg);
 
-            assert_eq!("five test with sign function", vec32_to_str(&msg));
+            assert_eq!("five test with sign function", vec32_to_str(msg));
         }
     }
 }
