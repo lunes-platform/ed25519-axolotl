@@ -956,12 +956,7 @@ fn crypto_sign_direct_rnd(
     n + 64
 }
 
-pub fn curve25519_sign(
-    sm: &mut Vec<u32>,
-    m: Vec<u32>,
-    sk: Vec<u32>,
-    opt_rnd: Vec<u32>,
-) -> usize {
+pub fn curve25519_sign(sm: &mut Vec<u32>, m: Vec<u32>, sk: Vec<u32>, opt_rnd: Vec<u32>) -> usize {
     // If opt_rnd is provided, sm must have n + 128,
     // otherwise it must have n + 64 bytes.
 

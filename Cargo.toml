@@ -1,6 +1,6 @@
 [package]
 name = "ed25519-axolotl"
-version = "1.5.0"
+version = "1.6.1"
 edition = "2021"
 description = "Ed25519-like signatures with X25519 keys, Axolotl-style."
 repository = "https://github.com/lunes-platform/ed25519-axolotl.git"
@@ -22,6 +22,7 @@ getrandom = { version = "0.2", features = ["js"] }
 rand = "0.8.4"
 wasm-bindgen = "0.2.78"
 wasm-bindgen-test = "0.3.29"
+js-sys = "0.3.56"
 
 [package.metadata.wasm-pack.profile.release]
 wasm-opt = false
