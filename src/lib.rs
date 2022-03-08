@@ -4,8 +4,6 @@ mod utils;
 use pyo3::{prelude::{pyclass, pymethods, pyfunction, pymodule, PyModule, PyResult, Python}, wrap_pyfunction};
 use rand::Rng;
 use utils::*;
-use wasm_bindgen::prelude::wasm_bindgen;
-
 
 #[pymodule]
 fn ed25519_axolotl(py: Python, module: &PyModule) -> PyResult<()> {
@@ -20,7 +18,6 @@ fn ed25519_axolotl(py: Python, module: &PyModule) -> PyResult<()> {
 
 
 #[pyclass]
-#[wasm_bindgen]
 pub struct KeyPair {
     prvk: Vec<u32>,
     pubk: Vec<u32>,
@@ -39,10 +36,8 @@ impl std::fmt::Display for KeyPair {
 }
 
 #[pymethods]
-#[wasm_bindgen]
 impl KeyPair {
     #[new]
-    #[wasm_bindgen(constructor)]
     pub fn new(seed: Option<Vec<u32>>) -> KeyPair {
         let seed = match seed {
             Some(vec) => vec,
@@ -71,13 +66,11 @@ impl KeyPair {
     }
 
     #[getter(private_key)]
-    #[wasm_bindgen(getter, js_name = "privateKey")]
     pub fn prvk(&self) -> Vec<u32> {
         return self.prvk.clone();
     }
 
     #[getter(public_key)]
-    #[wasm_bindgen(getter, js_name = "publiKey")]
     pub fn pubk(&self) -> Vec<u32> {
         return self.pubk.clone();
     }
@@ -85,7 +78,6 @@ impl KeyPair {
 
 
 #[pyfunction]
-#[wasm_bindgen(js_name = "fullSignature")]
 pub fn full_signature(
     secret_key: Vec<u32>,
     message: Vec<u32>,
@@ -106,7 +98,6 @@ pub fn full_signature(
 }
 
 #[pyfunction]
-#[wasm_bindgen(js_name = "fastSignature")]
 pub fn fast_signature(
     secret_key: Vec<u32>,
     message: Vec<u32>,
@@ -138,7 +129,6 @@ pub fn fast_signature(
 
 
 #[pyfunction]
-#[wasm_bindgen(js_name = "validateSignature")]
 pub fn validate_signature(public_key: Vec<u32>, message: Vec<u32>, signature: Vec<u32>) -> bool {
     let mut sm: Vec<u32> = vec![0; 64 + message.len()];
     let mut m: Vec<u32> = vec![0; 64 + message.len()];
@@ -160,7 +150,6 @@ pub fn validate_signature(public_key: Vec<u32>, message: Vec<u32>, signature: Ve
 
 
 #[pyfunction]
-#[wasm_bindgen]
 pub fn decode_message(public_key: Vec<u32>, full_signature: Vec<u32>) -> Vec<u32> {
     let mut tmp: Vec<u32> = vec![0; full_signature.len()];
     let message_len = curve25519_sign_open(&mut tmp, &mut full_signature.clone(), public_key) as usize;
@@ -174,7 +163,6 @@ pub fn decode_message(public_key: Vec<u32>, full_signature: Vec<u32>) -> Vec<u32
 
 
 #[pyfunction]
-#[wasm_bindgen(js_name = "randomBytes")]
 pub fn random_bytes(size: usize) -> Vec<u32> {
     let High: u32 = 255;
     let Low: u32 = 0;
@@ -186,7 +174,6 @@ pub fn random_bytes(size: usize) -> Vec<u32> {
     return seed;
 }
 
-#[wasm_bindgen(js_name = "stringToUint32Array")]
 pub fn str_to_vec32(text: String) -> Vec<u32> {
     let msg: Vec<u8> = text.as_bytes().to_vec();
     let mut msg_32: Vec<u32> = vec![0; msg.len()];
@@ -196,7 +183,6 @@ pub fn str_to_vec32(text: String) -> Vec<u32> {
     msg_32
 }
 
-#[wasm_bindgen(js_name = "uint32ArrayToString")]
 pub fn vec32_to_str(vec: Vec<u32>) -> String {
     let mut msg_8: Vec<u8> = vec![0; vec.len()];
     for i in 0..vec.len() {
