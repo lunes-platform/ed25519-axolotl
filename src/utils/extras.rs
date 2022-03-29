@@ -8,7 +8,7 @@
 // https://moderncrypto.org/mail-archive/curves/2014/000205.html
 //
 // Derived from axlsign.js written by Dmitry Chestnykh. https://github.com/wavesplatform/curve25519-js
-
+#![allow(unused, non_snake_case, non_upper_case_globals)]
 use rand::Rng; // 0.8.0
 
 fn gf() -> Vec<i64> {
