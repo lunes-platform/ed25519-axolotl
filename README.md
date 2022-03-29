@@ -9,7 +9,7 @@
  ## 🔭 Telescope
 
  For the user guide and further documentation, please read
- [Telescope](https:blockchain.lunes.io/telescope)
+ [Telescope](https://blockchain.lunes.io/telescope)
 
  ## 🏗 Archtecture
 
