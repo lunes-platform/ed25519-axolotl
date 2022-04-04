@@ -1,13 +1,12 @@
 [package]
 name = "ed25519-axolotl"
-version = "1.7.0"
+version = "1.7.1"
 edition = "2021"
 description = "Ed25519-like signatures with X25519 keys, Axolotl-style."
 repository = "https://github.com/lunes-platform/ed25519-axolotl.git"
-authors = ["Lunes Platform <development@lunes.io>"]
-license = "MIT"
+license = "Apache-2.0"
 keywords = ["ed25519", "axolotl", "lunes", "cryptography", "cryptocurrencies"]
-categories = ["algorithms", "cryptography::cryptocurrencies", "cryptography", "wasm"]
+categories = ["cryptography", "cryptography::cryptocurrencies", "algorithms"]
 readme = "README.md"
 
 [dependencies]
