@@ -9,6 +9,10 @@ keywords = ["ed25519", "axolotl", "lunes", "cryptography", "cryptocurrencies"]
 categories = ["cryptography", "cryptography::cryptocurrencies", "algorithms"]
 readme = "README.md"
 
-
 [dependencies]
+pyo3 = { version = "0.16.0", features = ["extension-module"] }
 rand = "0.8.4"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+name = "ed25519_axolotl"
